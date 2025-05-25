@@ -9,6 +9,7 @@ class Pokemon:
         self.pokemon_trainer = pokemon_trainer
         self.pokemon_number = random.randint(1, 1000)
         self.name = None
+        
         if pokemon_trainer not in Pokemon.pokemons:
             Pokemon.pokemons[pokemon_trainer] = self
         else:
@@ -73,10 +74,39 @@ class Pokemon:
                     return data['stats'][2]["base_stat"]  #  Pokémon adını döndürme
                 else:
                     return 0  # İstek başarısız olursa varsayılan adı döndürür
-                
+    
+    async def war(self, enemy):
+        if isinstance(enemy, Wizard):
+            luck = random.randint(1, 5)
+            if luck == 1:
+                return f"{self.name}, {enemy.name} isimli pokemona saldırdı! \n{enemy.name} kalkan kullandı!"
+        damage = round(self.attack * (1 - enemy.defense / (enemy.defense + 100)))
+        if enemy.hp > damage:
+            enemy.hp -= damage
+            return f"{self.name}, {enemy.name} isimli pokemona saldırdı! {damage} verdi! \n{enemy.name} isimli pokemonun kalan canı: {enemy.hp}"
+        else:
+            return f"{self.name}, {enemy.name} isimli pokemona saldırdı! {enemy.name} yenildi!"
+
+class Fighter(Pokemon):
+    async def war(self, enemy):
+        bonus_attack = random.randint(0,10)
+        self.attack += bonus_attack
+        result = await super().war(enemy)
+        self.attack -= bonus_attack
+        return f"Bonus attack puanı: {bonus_attack} \n{result}"
+
+class Wizard(Pokemon):
+    pass
+
 if __name__ == "__main__":
     async def pokemonn():
-        pikapika = Pokemon("SL")
+        pikapika = Fighter("SL")
+        pikapika2 = Fighter("Yoruko")
         print(await pikapika.info())
-    
+        print("--------------------------------------------")
+        print(await pikapika2.info())
+        print("--------------------------------------------")
+        print(await pikapika.war(pikapika2))
+        print("--------------------------------------------")
+        print(await pikapika2.war(pikapika))
     asyncio.run(pokemonn())
